@@ -206,8 +206,22 @@ class Engine(object):
         #TASK3 TODO#
         Write the SQL Statement and neccesary codeto create users_profile table
         '''
-
-        return False
+        statement = 'CREATE TABLE IF NOT EXISTS users_profile(user_id INTEGER PRIMARY KEY,\
+                        firstname TEXT,lastname TEXT,email TEXT,website TEXT,picture TEXT,\
+                        mobile TEXT,skype TEXT,age INTEGER,residence TEXT,gender TEXT,signature TEXT,\
+                        avatar TEXT,FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE)'
+      
+        con =sqlite3.connect(self.db_path)
+        with con:
+            cur = con.cursor()
+            try:
+                cur.execute(keys_on)
+                cur.execute(statement)
+            except Exception, excp:
+                print "Error %s:" % excp.args[0]
+                return False
+       
+        return True
 
     def create_friends_table(self):
         '''

@@ -39,7 +39,22 @@ Remember following things:
       users(user_id,nickname). When the parent row is deleted set the 
       user_nickname to null.
 */
-
+CREATE TABLE IF NOT EXISTS messages(
+	message_id PRIMARY KEY,
+	title TEXT,
+	body TEXT,
+	timeStamp INTEGER, 
+	ip TEXT,
+	timesviewed INTEGER,
+	reply_to INTEGER,
+	user_nickname TEXT,
+	user_id INTEGER,
+	editor_nickname TEXT,
+	FOREIGN KEY(reply_to) REFERENCES messages(message_id) ON DELETE CASCADE,
+	FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+	FOREIGN KEY(user_id,user_nickname) REFERENCES users(user_id,nickname) ON DELETE SET NULL
+);
+	
 
 COMMIT;
 PRAGMA foreign_keys=ON;
