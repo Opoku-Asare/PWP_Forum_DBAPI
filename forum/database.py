@@ -629,6 +629,7 @@ class Connection(object):
         keys_on = 'PRAGMA foreign_keys = ON'
         query = 'DELETE FROM messages WHERE message_id=?'
         con = self.con
+        
         try:
             with con:
                 cur = con.cursor()

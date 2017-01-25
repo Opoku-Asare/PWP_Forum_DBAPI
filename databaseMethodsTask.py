@@ -24,4 +24,5 @@ USER1 = {'public_profile': {'registrationdate': 1362015937,
 
 #print con.create_message("MongoDB is better","Yes it is better . it is NOSQL",sender="troll",replyto="msg-26")
 
+
 print con.delete_message("msg-27")

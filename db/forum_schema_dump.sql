@@ -39,6 +39,7 @@ Remember following things:
       users(user_id,nickname). When the parent row is deleted set the 
       user_nickname to null.
 */
+
 CREATE TABLE IF NOT EXISTS messages(
 	message_id PRIMARY KEY AUTOINCREMENT,
 	title TEXT,
