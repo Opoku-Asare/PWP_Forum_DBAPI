@@ -40,7 +40,7 @@ Remember following things:
       user_nickname to null.
 */
 CREATE TABLE IF NOT EXISTS messages(
-	message_id PRIMARY KEY,
+	message_id PRIMARY KEY AUTOINCREMENT,
 	title TEXT,
 	body TEXT,
 	timeStamp INTEGER, 

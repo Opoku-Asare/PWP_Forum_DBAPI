@@ -1,14 +1,62 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE users(
+  user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nickname TEXT UNIQUE,
+  regDate INTEGER,
+  lastLogin INTEGER,
+  timesviewed INTEGER,
+  UNIQUE(user_id, nickname));
 INSERT INTO "users" VALUES(1,'Mystery',1362015937,1362015937,2311);
 INSERT INTO "users" VALUES(2,'AxelW',1357724086,1357724086,8112);
 INSERT INTO "users" VALUES(3,'LinuxPenguin',1362012937,1362012937,139);
 INSERT INTO "users" VALUES(4,'Koodari',1389260086,1389260086,2198);
 INSERT INTO "users" VALUES(5,'HockeyFan',1394357686,1394357686,612);
-INSERT INTO "users_profile" VALUES(1,'Mystery','Williams','jane@imaginecompany.com',NULL,'photo1.jpg',NULL,NULL,22,'New York','Female', 'Well, hello there! Blah ...','avatar_2.gif');
-INSERT INTO "users_profile" VALUES(2,'Axel','Watts','aw@hotmail.com',NULL,'photo3.png',NULL,NULL,28,NULL,'Male', 'Without an exception, there is no rule...', NULL);
+INSERT INTO "users" VALUES(7,'sqlcoder',1485341591,1485341591,0);
+CREATE TABLE users_profile(
+  user_id INTEGER PRIMARY KEY,
+  firstname TEXT,
+  lastname TEXT,
+  email TEXT,
+  website TEXT,
+  picture TEXT,
+  mobile TEXT,
+  skype TEXT,
+  age INTEGER,
+  residence TEXT,
+  gender TEXT,
+  signature TEXT,
+  avatar TEXT,
+  FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE);
+INSERT INTO "users_profile" VALUES(1,'Mystery','Williams','jane@imaginecompany.com',NULL,'photo1.jpg',NULL,NULL,22,'New York','Female','Well, hello there! Blah ...','avatar_2.gif');
+INSERT INTO "users_profile" VALUES(2,'Axel','Watts','aw@hotmail.com',NULL,'photo3.png',NULL,NULL,28,NULL,'Male','Without an exception, there is no rule...',NULL);
 INSERT INTO "users_profile" VALUES(3,'François','Beaumont','francois@yahoo.com','http://www.francoisbeaumont.fr/','',NULL,NULL,19,'Paris','Male','None','avatar_4.jpg');
 INSERT INTO "users_profile" VALUES(4,'Matti','Meikalainen','matti@suomi24.fi','http://www.geocities.com/~matti/','photo_5.jpg',NULL,NULL,30,'Helsinki','Male','Elama on.','avatar_5.png');
 INSERT INTO "users_profile" VALUES(5,'Dan','Nicholls','dan@gmail.com','http://www.hockeyfan.com/','photo8.png',NULL,NULL,24,'Washington DC','Male','Washington Capitals rule!','avatar_7.jpg');
-INSERT INTO "messages" VALUES(1,'CSS: Margin problems with IE','I am using a float layout on my website but I''ve run into some problems with Internet Explorer. I have set the left margin of a float to 100 pixels, but IE uses a margin of 200px instead. Why is that? Is this one of the many bugs in IE?',1362017481,'213.216.232.193',0,NULL,'AxelW',2, NULL);
+INSERT INTO "users_profile" VALUES(7,'Mystery','Williams','jane@imaginecompany.com',NULL,'photo1.jpg',NULL,NULL,22,'New York','Female','Well, hello there! Blah ...','avatar_2.gif');
+CREATE TABLE friends (
+  user_id INTEGER,
+  friend_id INTEGER,
+  PRIMARY KEY(user_id, friend_id),
+  FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+  FOREIGN KEY(friend_id) REFERENCES users(user_id) ON DELETE CASCADE);
+INSERT INTO "friends" VALUES(4,5);
+INSERT INTO "friends" VALUES(4,1);
+CREATE TABLE "messages" (
+	`message_id`	INTEGER PRIMARY KEY AUTOINCREMENT,
+	`title`	TEXT,
+	`body`	TEXT,
+	`timeStamp`	INTEGER,
+	`ip`	TEXT,
+	`timesviewed`	INTEGER,
+	`reply_to`	INTEGER,
+	`user_nickname`	TEXT,
+	`user_id`	INTEGER,
+	`editor_nickname`	TEXT,
+	FOREIGN KEY(`reply_to`) REFERENCES `messages`(`message_id`) ON DELETE CASCADE,
+	FOREIGN KEY(`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
+);
+INSERT INTO "messages" VALUES(1,'CSS: Margin problems with IE','I am using a float layout on my website but I''ve run into some problems with Internet Explorer. I have set the left margin of a float to 100 pixels, but IE uses a margin of 200px instead. Why is that? Is this one of the many bugs in IE?',1362017481,'213.216.232.193',0,NULL,'AxelW',2,NULL);
 INSERT INTO "messages" VALUES(2,'Nothing works','The webpage is a shit',1362017481,'217.119.25.162',1,NULL,'Jack',NULL,NULL);
 INSERT INTO "messages" VALUES(3,'In case','Just in case you can''t find the book, here''s the equation:
                                 p_1 + ρgy_1 + 1/2 * ρ(v_1)^2 = p_2 + ρgy_2 + 1/2 * ρ(v_2)^2',1362017481,'211.213.225.19',0,1,'Science guru',NULL,NULL);
@@ -18,7 +66,7 @@ INSERT INTO "messages" VALUES(4,'Fourier transform','I have the following functi
 INSERT INTO "messages" VALUES(5,'According to a table','I checked my math books and found the transform for the
                                 function you gave (provided that a > 0): X(f) = 2a / (a^2 + (2πf)^2)
  
-                                Merry Christmas, by the way!',1362017481,'191.255.187.123',0,1,'Solver',NULL, NULL);
+                                Merry Christmas, by the way!',1362017481,'191.255.187.123',0,1,'Solver',NULL,NULL);
 INSERT INTO "messages" VALUES(6,'CSS: Margin problems with IE','I''m using a float layout on my website but I''ve run into
                                 some problems with Internet Explorer. I have set the left margin of
                                 a float to 100 pixels, but IE uses a margin of 200px instead. Why
@@ -62,5 +110,8 @@ INSERT INTO "messages" VALUES(19,'My favourite','I''m a fan of team England, but
                                 win the whole thing again.',1362017481,'212.89.186.12',0,1,'England',NULL,NULL);
 INSERT INTO "messages" VALUES(20,'Germany of course','Germany is the best! They have a strong team this time,
                                 so I hope it''s finally their turn to win!',1362017481,'80.66.88.179',0,1,'Kahn',NULL,NULL);
-INSERT INTO "friends" VALUES(4,5);
-INSERT INTO "friends" VALUES(4,1);
+INSERT INTO "messages" VALUES(26,'SQL Rules','Anyway let me study how sqlite works',1485352900,'0.0.0.0',0,NULL,'sqlcoder',7,'admin');
+DELETE FROM sqlite_sequence;
+INSERT INTO "sqlite_sequence" VALUES('users',7);
+INSERT INTO "sqlite_sequence" VALUES('messages',27);
+COMMIT;

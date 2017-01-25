@@ -627,10 +627,10 @@ class Connection(object):
         '''
         values = (messageid,)
         keys_on = 'PRAGMA foreign_keys = ON'
-        query = 'DELETE FROM messagees WHERE message_id=?'
+        query = 'DELETE FROM messages WHERE message_id=?'
         con = self.con
-        with con:
-            try:
+        try:
+            with con:
                 cur = con.cursor()
                 cur.execute(keys_on)
                 cur.execute(query,values)
@@ -639,11 +639,11 @@ class Connection(object):
                     return False
                 else:
                     return True
-            except Exception as e:
+        except Exception as e:
                  print "Error %s:" % e.args[0]
                  return False
-            finally:
-              con.close()
+        finally:
+            con.close()
         return False
 
     def modify_message(self, messageid, title, body, editor="Anonymous"):
@@ -699,7 +699,7 @@ class Connection(object):
                     if cur.rowcount<1:
                         return None
                     else:
-                        return cur.lastrowid
+                        return messageid
         except Exception as e:
                 print "Error %s:" % e.args[0]
                 return None
@@ -751,7 +751,7 @@ class Connection(object):
                            current timestamp.
             - ip -> passed as argument ipaddres
             - timesviewed -> Use the int 0.
-            - reply_to -> passed as argument replyto. It is recommended
+            - reply_to -> passed as argument replyto. If replyto is not None, It is recommended
                           that you check that the message exists.
                           Otherwise, return None.
                           To check if the message exists check the messages
@@ -782,21 +782,25 @@ class Connection(object):
         try:
             self.set_foreign_keys_support()
             con = self.con
-            with con:
-                cur=con.cursor()
-                cur.execute(checkReplyToQuery,(replyto,))
-                if cur.fetchone() is None:
-                    raise ValueError("replyto message not found")
+            if replyto is not None:
+                    with con:
+                        cur=con.cursor()
+                        cur.execute(checkReplyToQuery,(replyto,))
+                        if cur.fetchone() is None:
+                            raise ValueError("replyto message not found")
             with con:
                 cur=con.cursor()
                 cur.execute(checkUserQuery,(sender,))
                 data=cur.fetchone()
                 if data is None:
-                     raise ValueError("sender not found")
+                    #user is not registered
+                    userId=None
+                    if sender=="Anonymous":
+                        sender=None
                 else:
                     userId=data[0]
             with con:
-                    values = (title,body,timeStamp,ipaddress,timesviewed,replyto,sender,userId,editor,)
+                    values = (title,body,timeStamp,ipaddress,timesviewed,replyto,sender,userId,None,)
                     cur = con.cursor()
                     cur.execute(query,values)
                     con.commit()
@@ -1104,7 +1108,7 @@ class Connection(object):
         '''
         Create a new user in the database.
 
-        :param str nickname: The nickname of the user to modify
+        :param str nickname: The nickname of the user 
         :param dict user: a dictionary with the information to be modified. The
                 dictionary has the following structure:
 
@@ -1138,8 +1142,8 @@ class Connection(object):
 
             Note that all values are string if they are not otherwise indicated.
 
-        :return: the nickname of the modified user or None if the
-            ``nickname`` passed as parameter is not  in the database.
+        :return: the nickname of the created user or None if the
+            ``nickname`` passed as parameter is already  in the database.
         :raise ValueError: if the user argument is not well formed.
 
         '''
@@ -1205,6 +1209,8 @@ class Connection(object):
         else:
             return None
 
+   
+    
     # UTILS
     def get_friends(self, nickname):
         '''
