@@ -625,7 +625,25 @@ class Connection(object):
             * test_delete_message_malformed_id
             * test_delete_message_noexisting_id
         '''
-
+        values = (messageid,)
+        keys_on = 'PRAGMA foreign_keys = ON'
+        query = 'DELETE FROM messagees WHERE message_id=?'
+        con = self.con
+        with con:
+            try:
+                cur = con.cursor()
+                cur.execute(keys_on)
+                cur.execute(query,values)
+                con.commit()
+                if cur.rowcount<1:
+                    return False
+                else:
+                    return True
+            except Exception as e:
+                 print "Error %s:" % e.args[0]
+                 return False
+            finally:
+              con.close()
         return False
 
     def modify_message(self, messageid, title, body, editor="Anonymous"):
@@ -669,7 +687,25 @@ class Connection(object):
                         * test_modify_message_malformed_id
                         * test_modify_message_noexisting_id
         '''
-
+        values = (title,body,editor,messageid,)
+        query = 'UPDATE messages SET title=?, body=?, editor_nickname=? WHERE message_id=?'
+        try:
+            self.set_foreign_keys_support()
+            con = self.con
+            with con:
+                    cur = con.cursor()
+                    cur.execute(query,values)
+                    con.commit()
+                    if cur.rowcount<1:
+                        return None
+                    else:
+                        return cur.lastrowid
+        except Exception as e:
+                print "Error %s:" % e.args[0]
+                return None
+        finally:
+           con.close()
+      
         return None
 
     def create_message(self, title, body, sender="Anonymous",
@@ -736,7 +772,43 @@ class Connection(object):
                 * test_append_answer_malformed_id
                 * test_append_answer_noexistingid
         '''
- 
+        timeStamp=time.mktime(datetime.now().timetuple())
+        timesviewed=0
+        userId=0
+       
+        checkReplyToQuery='SELECT * from messages WHERE message_id = ?'
+        checkUserQuery='SELECT user_id from users WHERE nickname = ?'
+        query = 'INSERT INTO messages(title,body,timeStamp,ip,timesviewed,reply_to,user_nickname,user_id,editor_nickname) values(?,?,?,?,?,?,?,?,?)'
+        try:
+            self.set_foreign_keys_support()
+            con = self.con
+            with con:
+                cur=con.cursor()
+                cur.execute(checkReplyToQuery,(replyto,))
+                if cur.fetchone() is None:
+                    raise ValueError("replyto message not found")
+            with con:
+                cur=con.cursor()
+                cur.execute(checkUserQuery,(sender,))
+                data=cur.fetchone()
+                if data is None:
+                     raise ValueError("sender not found")
+                else:
+                    userId=data[0]
+            with con:
+                    values = (title,body,timeStamp,ipaddress,timesviewed,replyto,sender,userId,editor,)
+                    cur = con.cursor()
+                    cur.execute(query,values)
+                    con.commit()
+                    if cur.rowcount<1:
+                        return None
+                    else:
+                        return cur.lastrowid
+        except Exception as e:
+                print "Error %s:" % e.args[0]
+                return None
+        finally:
+           con.close()
         return None
 
     def append_answer(self, replyto, title, body, sender="Anonymous",
@@ -1171,8 +1243,28 @@ class Connection(object):
                 * test_get_user_id
                 * test_get_user_id_unknown_user
         '''
-
+         
+        query='SELECT user_id from users WHERE nickname = ?'
+      
+        try:
+            self.set_foreign_keys_support()
+            con = self.con
+            
+            with con:
+                cur=con.cursor()
+                cur.execute(query,(nickname,))
+                data=cur.fetchone()
+                if data is None:
+                     raise ValueError("user with specified nickname not found")
+                else:
+                    return data[0]
+        except Exception as e:
+                print "Error %s:" % e.args[0]
+                return None
+        finally:
+           con.close()
         return None
+       
 
     def contains_user(self, nickname):
         '''
